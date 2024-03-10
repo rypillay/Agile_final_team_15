@@ -10,6 +10,9 @@ DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS readers;
 DROP TABLE IF EXISTS authors;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS forums;
+DROP TABLE IF EXISTS topics;
+DROP TABLE IF EXISTS posts;
 
 -- Create the users table
 CREATE TABLE IF NOT EXISTS users (
@@ -70,6 +73,39 @@ CREATE TABLE IF NOT EXISTS drafts (
     FOREIGN KEY (author_id) REFERENCES users(user_id)
 );
 
+-- Create the forums table
+CREATE TABLE IF NOT EXISTS forums (
+    forum_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT
+);
+
+-- Create the topics table
+CREATE TABLE IF NOT EXISTS topics (
+    topic_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT,
+    created_at TEXT,
+    publication_date TEXT,
+    author_id INTEGER,
+    forum_id INTEGER,
+    FOREIGN KEY (author_id) REFERENCES users(user_id),
+    FOREIGN KEY (forum_id) REFERENCES forums(forum_id)
+);
+
+-- Create the posts table
+CREATE TABLE IF NOT EXISTS posts (
+    post_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    text TEXT NOT NULL,
+    publication_date TEXT,
+    topic_id INTEGER,
+    author_id INTEGER,
+    FOREIGN KEY (topic_id) REFERENCES topics(topic_id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES users(user_id)
+);
+
+
+
 -- Insert some default data for testing (optional)
 INSERT INTO users (name, role, password) VALUES
     ('Simon Star', 'author', 'sample_password'),
@@ -88,5 +124,28 @@ INSERT INTO drafts (title, subtitle, text, author_id) VALUES
 INSERT INTO comments (text, publication_date, article_id, reader_id) VALUES
     ('Great article!', '2023-07-19', 1, 2),
     ('Interesting read!', '2023-07-20', 2, 2);
+
+-- Insert dummy forums
+INSERT INTO forums (title, description) VALUES
+  ('General Discussion', 'Discuss anything related to the community'),
+  ('Programming Help', 'Get help with programming questions'),
+  ('Tech News', 'Discuss the latest technology news'),
+  ('Computer Science', 'Topics related to computer science discussions');
+
+-- Insert dummy topics for the Computer Science forum
+INSERT INTO topics (title, content, created_at, publication_date, author_id, forum_id) VALUES
+  ('Algorithms in Python', 'Discuss various algorithms implemented in Python', '2023-07-19', '2024-03-06', 1, 1),
+  ('Machine Learning Basics', 'Introduction to machine learning concepts', '2024-03-06', '2024-03-06', 1, 2),
+  ('Web Development Trends', 'Latest trends and technologies in web development', '2024-03-06', '2024-03-06', 1, 3);
+
+-- Insert dummy posts for the topics
+INSERT INTO posts (text, publication_date, topic_id, author_id) VALUES
+  ('I have a question about sorting algorithms. Can someone help?', '2024-03-06', 1, 1),
+  ('Sure! I can help you with sorting algorithms. What do you need assistance with?', '2024-03-06', 1, 2),
+  ('Has anyone tried implementing a simple machine learning model in Python?', '2024-03-06', 2, 2),
+  ('Yes, I''ve worked on a basic linear regression model. Happy to share my experience!', '2024-03-06', 2, 1),
+  ('Excited about the upcoming web development technologies. Any recommendations for learning?', '2024-03-06', 3, 1),
+  ('You should check out the latest JavaScript frameworks like React and Vue.js!', '2024-03-06', 3, 2);
+
 
 COMMIT;
